@@ -45,8 +45,11 @@ Testes automatizados com Playwright, Chromium (Edge) e WebKit 26.5 para Windows,
 - Carta longa com rolagem interna, fechar visível, foco contido, Tab e Escape.
 - Reinício, revelação completa, movimento reduzido e layout com fonte raiz ampliada.
 - Build de produção com alvo Safari 15. Nenhum erro JavaScript nos testes.
+- Conexão lenta simulada no Chromium: latência de 400 ms e download de 16 KB/s; iniciar por toque, revelar, abrir e fechar a carta. O botão inicial aguarda a preparação do desenho.
 
 `scripts/check.mjs` permite repetir os testes com Playwright instalado à parte (`PLAYWRIGHT_PATH` opcional). `TEST_URL` permite testar o endereço publicado. Screenshots e resultados locais ficam em `test-results/`, ignorados no Git.
+
+`scripts/verify-public.mjs` compara SHA-256 de seis arquivos publicados com o build local e verifica o fluxo por toque com conexão lenta simulada. Execute após `npm run build`, com `TEST_URL` apontando para o site.
 
 **Limitações:** WebKit no Windows é um motor atual de teste, não Safari 15. Não houve teste em iPhone físico, simulação real das barras dinâmicas do Safari, VoiceOver ou suspensão do processo pelo iOS. A troca de aba foi simulada com os eventos correspondentes. O teste de aumento de fonte raiz não substitui todos os ajustes de acessibilidade do iOS. Um teste no aparelho dela continua sendo útil.
 

@@ -1,0 +1,31 @@
+import {createRequire} from 'node:module';
+import {readFile,writeFile} from 'node:fs/promises';
+import {createHash} from 'node:crypto';
+import assert from 'node:assert/strict';
+const require=createRequire(import.meta.url);
+const {chromium}=require(process.env.PLAYWRIGHT_PATH || 'playwright');
+const url=process.env.TEST_URL || 'http://127.0.0.1:4173/';
+const checks=[];
+for(const file of ['index.html','app.js','personalizacao.js','style.css','favicon.svg','preview.png']){
+  const response=await fetch(new URL(file,url));assert.equal(response.status,200,file);
+  const received=Buffer.from(await response.arrayBuffer());const local=await readFile('dist/'+file);
+  const hash=b=>createHash('sha256').update(b).digest('hex');assert.equal(hash(received),hash(local),'published asset mismatch: '+file);
+  checks.push({file,status:response.status,bytes:received.length,sha256:hash(received)});
+}
+const browser=await chromium.launch({channel:'msedge',headless:true});
+const page=await browser.newPage({viewport:{width:375,height:568},hasTouch:true});
+const cdp=await page.context().newCDPSession(page);
+await cdp.send('Network.enable');
+await cdp.send('Network.emulateNetworkConditions',{offline:false,latency:400,downloadThroughput:16000,uploadThroughput:8000});
+const errors=[];page.on('pageerror',e=>errors.push(e.message));
+await page.goto(url,{waitUntil:'domcontentloaded'});
+await page.locator('#start:enabled').waitFor();
+await page.locator('#start').tap();assert(await page.locator('#story').isVisible());
+await page.locator('#reveal').tap();assert.equal(await page.locator('.flower-touch.available').count(),14);
+await page.locator('#letter').tap();assert(await page.locator('#modal-content').innerText().then(t=>t.includes('eu te amo muito')));
+await page.locator('#modal-close').tap();
+assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));assert.deepEqual(errors,[]);
+await page.screenshot({path:'test-results/public-375.png',fullPage:true});
+await browser.close();
+await writeFile('test-results/published.json',JSON.stringify({url,checks,slowNetwork:'400 ms latency; 16 KB/s download; touch start → reveal → letter → close passed',errors},null,2));
+console.log(JSON.stringify({url,matchingAssets:checks.length,initialBytes:checks.filter(c=>!['preview.png'].includes(c.file)).reduce((n,c)=>n+c.bytes,0),slowTouchFlow:'passed',errors},null,2));

@@ -146,4 +146,6 @@
   var motionChange=function(){if(reduced.matches&&started){elapsed=c.duracao;render();sync();}};
   if(reduced.addEventListener)reduced.addEventListener('change',motionChange);else if(reduced.addListener)reduced.addListener(motionChange);
   render();
+  $('start').disabled=false;
+  $('start').removeAttribute('aria-busy');
 }());
