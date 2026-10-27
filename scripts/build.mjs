@@ -1,0 +1,11 @@
+import { build } from 'esbuild';
+import { mkdir,readFile,writeFile,cp,rm } from 'node:fs/promises';
+await rm('dist',{recursive:true,force:true});
+await mkdir('dist',{recursive:true});
+await build({entryPoints:['src/app.js','src/personalizacao.js'],outdir:'dist',target:['safari15'],minify:true,charset:'utf8'});
+await cp('src/style.css','dist/style.css');
+await cp('public','dist',{recursive:true});
+const url=process.env.SITE_URL || 'https://harleyzinn.github.io/ari-universo-em-flor/';
+await writeFile('dist/index.html',(await readFile('index.html','utf8')).replaceAll('__SITE_URL__',url));
+await writeFile('dist/.nojekyll','');
+console.log('Built for Safari 15; relative assets ready for GitHub Pages.');

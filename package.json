@@ -1,0 +1,10 @@
+{
+  "name": "ari-universo-em-flor",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "dev": "node scripts/serve.mjs"
+  },
+  "devDependencies": { "esbuild": "0.25.12" }
+}

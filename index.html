@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#141827">
+  <meta name="description" content="Um pequeno céu, um jardim e um mundo de carinho. Feito para Ari.">
+  <meta property="og:title" content="Ari, meu universo em flor">
+  <meta property="og:description" content="Fiz um cantinho do universo só pra você.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="__SITE_URL__preview.png">
+  <meta property="og:url" content="__SITE_URL__">
+  <title>Ari, meu universo em flor</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./style.css">
+  <script defer src="./personalizacao.js"></script>
+  <script defer src="./app.js"></script>
+</head>
+<body>
+  <main id="main">
+    <header class="heading">
+      <p class="eyebrow">UM PRESENTE FEITO DE CARINHO</p>
+      <h1><span id="name">Ari</span>, meu universo <em>em flor.</em></h1>
+      <p class="subtitle">Tem coisas que o coração desenha melhor que as palavras.</p>
+    </header>
+    <section class="experience" aria-label="Seu jardim noturno">
+      <div class="art-column">
+        <div class="garden" id="garden">
+          <svg id="drawing" viewBox="0 0 360 370" aria-hidden="true" focusable="false">
+            <defs><radialGradient id="aura"><stop stop-color="#b6a4da" stop-opacity=".10"/><stop offset="1" stop-color="#b6a4da" stop-opacity="0"/></radialGradient></defs>
+            <ellipse cx="180" cy="180" rx="178" ry="172" fill="url(#aura)"/>
+            <g id="sky"></g>
+            <path class="orbit" d="M38 221C-10 81 112 3 232 40S377 241 290 309"/>
+            <path class="orbit" d="M67 307C137 349 244 341 308 279"/>
+            <g id="botanical"></g>
+            <g id="dedication" class="unrevealed"><path d="M149 210 Q180 220 211 210" fill="none" stroke="#d8be84" stroke-width=".6"/><text x="180" y="193" text-anchor="middle">Ari</text><text class="svg-small" x="180" y="238" text-anchor="middle">meu lugar bonito no universo</text></g>
+            <g id="extra-flower" class="unrevealed"></g>
+            <circle id="light" cx="180" cy="177" r="3" fill="#f4dfaa"/>
+            <circle id="light-halo" cx="180" cy="177" r="9" fill="#f4dfaa" opacity=".1"/>
+          </svg>
+          <div id="flower-buttons"></div>
+          <button id="secret" class="star-touch" aria-label="Uma estrela especial: abrir recado secreto" title="Uma estrela especial">✧</button>
+        </div>
+        <p class="garden-caption">Cada flor guarda um pouquinho<br>do que sinto por você.</p>
+      </div>
+      <div class="words-column">
+        <div id="opening" class="opening">
+          <span class="tiny-star" aria-hidden="true">✧</span>
+          <h2 id="opening-text"></h2>
+          <p>Um pontinho de luz.<br>E todo o meu amor por você.</p>
+          <button id="start" class="primary">Deixa eu te mostrar <span aria-hidden="true">↗</span></button>
+          <p class="quiet">Floresce devagar. Fique o tempo que quiser.</p>
+        </div>
+        <div id="story" hidden>
+          <div class="story-label"><span id="chapter">O primeiro pontinho de luz</span><span id="count">0 / 14</span></div>
+          <div class="progress" role="progressbar" aria-label="Crescimento do jardim" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="progress-fill"></span></div>
+          <article class="note" id="note-card">
+            <p class="eyebrow" id="note-label">TUDO COMEÇA COM CARINHO</p>
+            <p id="note-text">Às vezes, um sentimento é tão grande que vira um universo inteiro.</p>
+            <button class="close-note" id="close-note" hidden>Voltar ao jardim</button>
+          </article>
+          <div class="note-nav" aria-label="Navegar pelos recados"><button id="previous">← Anterior</button><button id="next">Próximo →</button></div>
+          <div class="controls" aria-label="Controles da experiência"><button id="pause">Pausar</button><button id="reveal">Revelar tudo</button><button id="restart">Recomeçar</button></div>
+          <div id="ending" hidden><p id="final-text"></p><button class="primary" id="letter">Ainda tem uma coisa…</button></div>
+        </div>
+        <div class="explore"><button id="all">Ler todos os recados</button><span aria-hidden="true">·</span><button id="extra">Um carinho extra</button></div>
+      </div>
+    </section>
+    <footer><span class="footer-line"></span><p id="signature"></p><span aria-hidden="true">✧</span></footer>
+    <noscript><p class="no-js">Este jardim precisa de JavaScript para florescer. Ative-o no navegador e recarregue a página.</p></noscript>
+  </main>
+  <div class="modal" id="modal" hidden>
+    <section class="modal-sheet" role="dialog" aria-modal="true" aria-labelledby="modal-title" tabindex="-1">
+      <header class="modal-header"><h2 id="modal-title"></h2><button id="modal-close" aria-label="Fechar">Fechar ×</button></header>
+      <div class="modal-content" id="modal-content"></div>
+    </section>
+  </div>
+</body>
+</html>
