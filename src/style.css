@@ -4,4 +4,12 @@
 @media(max-width:700px){main{padding:30px 20px 20px;padding-top:max(30px,env(safe-area-inset-top));padding-bottom:max(20px,env(safe-area-inset-bottom))}h1{font-size:35px;letter-spacing:-1px;max-width:330px;margin:14px auto}h1 em{display:block}.heading .eyebrow{font-size:9px;letter-spacing:.21em}.subtitle{font-size:12px;max-width:265px;margin:auto}.experience{display:block;margin-top:9px}.art-column{width:100%}.garden{max-width:360px}.garden-caption{font-size:11px;margin-top:-4px}.words-column{padding-top:23px;max-width:400px;margin:auto}.opening{text-align:center}.tiny-star{display:none}.opening h2{font-size:25px;max-width:315px;margin:0 auto 13px}.opening>p{font-size:16px}.opening .primary{margin-top:20px}.opening .quiet{font-size:11px}.explore{margin-top:16px}.note{min-height:150px;padding:20px}.note-nav button{font-size:13px}.controls button{font-size:12px}.story-label{font-size:11px}.modal{padding:12px}.modal-content{padding:22px}.modal-header h2{font-size:22px}footer{margin-top:29px}}
 @media(max-width:350px){main{padding-left:16px;padding-right:16px}h1{font-size:31px}.subtitle{font-size:11px}.opening h2{font-size:23px}.explore button{font-size:11px}#note-text{font-size:20px}}
 @media(max-height:500px) and (min-width:600px){main{padding-top:20px}.experience{gap:28px}.art-column{width:45%}h1{font-size:32px}.words-column{padding-top:0}.modal-sheet{max-height:90vh}}
+.bloom,#botanical .unrevealed,#dedication{transition:none}
+#story{animation:story-enter .6s ease-out both}
+#ending{animation:story-enter .8s ease-out both}
+.message-in-a{animation:message-in-a .45s ease-out both}
+.message-in-b{animation:message-in-b .45s ease-out both}
+@keyframes story-enter{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+@keyframes message-in-a{from{opacity:.2;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+@keyframes message-in-b{from{opacity:.2;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{transition:none!important;animation:none!important}}

@@ -1,7 +1,8 @@
 (function () {
   'use strict';
   var c = window.PRESENTE;
-  var $ = function (id) { return document.getElementById(id); };
+  var elements = {};
+  var $ = function (id) { return elements[id] || (elements[id] = document.getElementById(id)); };
   var ns = 'http://www.w3.org/2000/svg';
   var reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
   var positions = [[150,296],[108,263],[72,219],[47,167],[55,111],[99,79],[151,101],[209,101],[261,79],[305,111],[313,167],[288,219],[252,263],[210,296]];
@@ -9,6 +10,8 @@
   var paused = false, inspecting = false, modalOpen = false, suspended = false;
   var completed = false, current = -1, shown = -1, returnFocus = null;
   var opened = {}, extraShown = false;
+  var lastCount = -1, lastPercent = -1, lastChapter = '', endingVisible = false;
+  var dedicationOpacity = -1, lightOpacity = -1;
   function svg(tag, attrs, parent) {
     var el = document.createElementNS(ns, tag);
     Object.keys(attrs).forEach(function (key) { el.setAttribute(key, attrs[key]); });
@@ -44,6 +47,29 @@
     for(var d=0;d<5;d++)svg('circle',{cx:Math.cos(d*1.256)*2,cy:Math.sin(d*1.256)*2,r:.55,fill:'#514539'},group);
     return group;
   }
+  // Sample geometry once. Playback interpolates numbers without querying SVG geometry.
+  function preparePath(path, followLight) {
+    var length = path.getTotalLength(), points = [];
+    if(followLight!==false){for(var n=0;n<=40;n++){var point=path.getPointAtLength(length*n/40);points.push({x:point.x,y:point.y});}}
+    path.style.strokeDasharray=length;path.style.strokeDashoffset=length;
+    return {element:path,length:length,points:points,progress:-1};
+  }
+  function clamp(value){return Math.max(0,Math.min(1,value));}
+  function smooth(value){value=clamp(value);return value*value*(3-2*value);}
+  function drawPath(path,progress){
+    progress=clamp(progress);
+    if(path.progress===progress)return;
+    path.progress=progress;path.element.style.strokeDashoffset=path.length*(1-progress);
+  }
+  var arrival=preparePath(svg('path',{d:'M180 326 C158 313 198 304 180 326',class:'constellation'},$('botanical')));
+  var lightGroup=svg('g',{},null);
+  $('light').parentNode.insertBefore(lightGroup,$('light'));
+  lightGroup.appendChild($('light-halo'));lightGroup.appendChild($('light'));
+  function moveLight(path,progress){
+    var index=clamp(progress)*40, low=Math.min(39,Math.floor(index)), mix=index-low;
+    var a=path.points[low],b=path.points[low+1];
+    lightGroup.setAttribute('transform','translate('+(a.x+(b.x-a.x)*mix-180).toFixed(3)+' '+(a.y+(b.y-a.y)*mix-326).toFixed(3)+')');
+  }
   positions.forEach(function (pos, i) {
     var x = pos[0], y = pos[1], prev = i === 0 ? [180,326] : positions[i-1];
     var group = svg('g',{},$('botanical'));
@@ -51,10 +77,10 @@
     var bx = x + (x < 180 ? 24 : -24), by = y + 43;
     var stem = svg('path',{d:'M'+bx+' '+by+' C'+(x+18)+' '+(y+27)+' '+(x-8)+' '+(y+21)+' '+x+' '+y,class:'stem'},group);
     var leaf = svg('path',{d:'M'+(x+7)+' '+(y+26)+' q-29 -2 -26 -20 q19 1 26 20 M'+(x+10)+' '+(y+31)+' q23 -10 20 -23 q-18 5 -20 23',class:'leaf unrevealed'},group);
-    var flower = bloom(group,x,y,i,false); flower.classList.add('bloom');
+    var flowerPosition=svg('g',{transform:'translate('+x+' '+y+')'},group);
+    var flower = bloom(flowerPosition,0,0,i,false); flower.classList.add('bloom');
     var star = svg('path',{d:'M'+(x-22)+' '+(y-21)+'v8 m-4 -4h8',stroke:c.paleta.ouro,'stroke-width':.65,class:'unrevealed'},group);
-    var paths = [connection,stem];
-    paths.forEach(function(path){var length=path.getTotalLength();path.dataset.length=length;path.style.strokeDasharray=length;path.style.strokeDashoffset=length;});
+    var paths = [preparePath(connection),preparePath(stem,false)];
     var button = document.createElement('button');
     button.className='flower-touch'; button.style.left=(x/360*100)+'%';button.style.top=(y/370*100)+'%';
     button.setAttribute('aria-label','Flor '+(i+1)+': '+c.recados[i]);button.setAttribute('tabindex','-1');
@@ -63,20 +89,28 @@
   });
   svg('path',{d:'M178 345Q193 324 180 313',class:'stem'},$('extra-flower'));
   bloom($('extra-flower'),180,313,1,true);
+  var closing=preparePath(svg('path',{d:'M210 296 Q194 316 180 326',class:'constellation'},$('botanical')));
   function setFlower(i, progress) {
     var f=flowers[i];
     if(f.progress===progress)return;
     f.progress=progress;
-    f.paths.forEach(function(path){path.style.strokeDashoffset=Number(path.dataset.length)*(1-progress);});
-    var visible=progress>.65;
+    drawPath(f.paths[0],progress);
+    drawPath(f.paths[1],smooth((progress-.25)/.7));
+    var growth=smooth((progress-.56)/.44);
+    f.flower.style.opacity=growth;
+    f.flower.setAttribute('transform','scale('+(0.55+growth*.45).toFixed(4)+')');
+    f.leaf.style.opacity=smooth((progress-.4)/.45);
+    f.star.style.opacity=smooth((progress-.15)/.35);
+    var visible=growth>.1;
     if(f.visible!==visible){
-      f.visible=visible;f.flower.classList.toggle('visible',visible);f.leaf.classList.toggle('revealed',visible);f.star.classList.toggle('revealed',visible);
+      f.visible=visible;
       f.button.classList.toggle('available',visible);f.button.setAttribute('tabindex',visible?'0':'-1');
     }
   }
   function note(i, user) {
     current=i;$('note-label').textContent='UMA FLOR, UM CARINHO · '+(i+1)+' / '+c.recados.length;
     $('note-text').textContent=c.recados[i];
+    $('note-text').className=i%2?'message-in-a':'message-in-b';
     if(user){opened[i]=true;flowers[i].button.classList.add('opened');flowers[i].button.setAttribute('aria-label','Flor '+(i+1)+', já lida: '+c.recados[i]);}
   }
   function openNote(i) {
@@ -88,21 +122,29 @@
   }
   function render() {
     var normalized=elapsed/c.duracao, time=normalized*75000;
-    var stage=Math.min(13,Math.floor((time-3000)/5000));
-    for(var i=0;i<flowers.length;i++)setFlower(i,Math.max(0,Math.min(1,(time-3000-i*5000)/1600)));
+    var stage=Math.min(13,Math.floor((time-2000)/5000));
+    // Each five-second phrase keeps moving: constellation, stem, leaves, then petals.
+    // The light follows just the connected contour, never jumping to a different stem.
+    drawPath(arrival,time/2000);
+    for(var i=0;i<flowers.length;i++)setFlower(i,clamp((time-2000-i*5000)/5000));
+    drawPath(closing,(time-72000)/3000);
     if(stage>=0&&stage!==shown){shown=stage;if(!inspecting)note(stage,false);}
-    $('count').textContent=flowers.filter(function(f){return f.visible;}).length+' / '+c.recados.length;
+    var count=flowers.filter(function(f){return f.visible;}).length;
+    if(count!==lastCount){lastCount=count;$('count').textContent=count+' / '+c.recados.length;}
     $('progress-fill').style.transform='scaleX('+Math.min(1,normalized)+')';
-    $('progress-fill').parentNode.setAttribute('aria-valuenow',String(Math.round(normalized*100)));
-    if(stage>=0&&time<73000){
-      var f=flowers[stage], fraction=Math.max(0,Math.min(1,(time-3000-stage*5000)/1600));
-      var path=f.paths[fraction<.5?0:1];var point=path.getPointAtLength(Number(path.dataset.length)*(fraction<.5?fraction*2:(fraction-.5)*2));
-      ['light','light-halo'].forEach(function(id){$(id).setAttribute('cx',point.x);$(id).setAttribute('cy',point.y);});
-    }
-    $('dedication').classList.toggle('revealed',time>=71000);
-    $('light').style.opacity=time>=74000?'0':'1';$('light-halo').style.opacity=time>=74000?'0':'1';
-    if(normalized>=1){completed=true;$('ending').hidden=false;$('chapter').textContent='Um jardim inteiro pra você';}
-    else $('chapter').textContent=stage<0?'O primeiro pontinho de luz':stage<5?'O céu aprende a florescer':stage<10?'Cada detalhe, um carinho':'Meu universo tem seu nome';
+    var percent=Math.round(normalized*100);
+    if(percent!==lastPercent){lastPercent=percent;$('progress-fill').parentNode.setAttribute('aria-valuenow',String(percent));}
+    if(time<2000)moveLight(arrival,time/2000);
+    else if(time<72000)moveLight(flowers[stage].paths[0],(time-2000-stage*5000)/5000);
+    else moveLight(closing,(time-72000)/3000);
+    // Timeline-driven fades freeze with pause, including the last reveal.
+    var dedicationFade=smooth((time-70000)/4000),lightFade=1-smooth((time-73500)/1500);
+    if(dedicationFade!==dedicationOpacity){dedicationOpacity=dedicationFade;$('dedication').style.opacity=dedicationFade;}
+    if(lightFade!==lightOpacity){lightOpacity=lightFade;lightGroup.style.opacity=lightFade;}
+    if(normalized>=1){completed=true;}
+    if(completed!==endingVisible){endingVisible=completed;$('ending').hidden=!completed;}
+    var chapter=completed?'Um jardim inteiro pra você':stage<0?'O primeiro pontinho de luz':stage<5?'O céu aprende a florescer':stage<10?'Cada detalhe, um carinho':'Meu universo tem seu nome';
+    if(chapter!==lastChapter){lastChapter=chapter;$('chapter').textContent=chapter;}
   }
   function isRunning(){return started&&!paused&&!inspecting&&!modalOpen&&!document.hidden&&!suspended&&!completed;}
   function tick(now){frame=null;if(!isRunning()){last=null;return;}if(last!==null)elapsed=Math.min(c.duracao,elapsed+Math.min(now-last,250));last=now;render();if(isRunning())frame=requestAnimationFrame(tick);else sync();}

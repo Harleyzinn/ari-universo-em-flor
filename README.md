@@ -20,6 +20,8 @@ Abra `http://127.0.0.1:4173`. A pasta publicada é `dist/`. Os assets usam camin
 
 Uma única linha do tempo com `requestAnimationFrame` governa a narrativa. Pausa manual, recado aberto, diálogo, aba oculta e `pagehide` suspendem o avanço. `pageshow` retoma sem acumular tempo oculto. Anterior/próximo permitem ler todos os recados mesmo antes da revelação das respectivas flores. O botão de voltar ao jardim retoma a narrativa, respeitando uma pausa manual anterior. “Revelar tudo” conclui o jardim; “Recomeçar” volta à abertura sem duplicar elementos. A flor extra é única e pode ser relida.
 
+A luz percorre um caminho contínuo, sem saltar entre os caules. Cada trecho de cinco segundos intercala traço, caule, folhas e abertura das pétalas, mantendo o tempo de leitura. As geometrias do percurso são amostradas uma única vez; o playback interpola as posições, altera apenas os traços ativos e atualiza os textos somente nas mudanças de etapa. As pétalas e os traços também congelam ao pausar. `scripts/check-motion.mjs` verifica continuidade em todas as junções, ausência de intervalos parados e de consultas de geometria durante a reprodução, além do limite de alterações de texto.
+
 Os desenhos são SVG próprios e os textos são HTML. Os recados não são anunciados automaticamente por leitor de tela; as flores têm nomes acessíveis. Os diálogos têm foco contido, Escape, fechamento acessível e rolagem interna. A navegação funciona por teclado. Flores abertas ganham uma marca ✓, além de seu nome acessível. “Ler todos os recados” está disponível desde a abertura, inclusive segredo e extra.
 
 ## Compatibilidade
